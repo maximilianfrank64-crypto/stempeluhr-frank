@@ -1,0 +1,32 @@
+name: 💡 Idee / Feature request
+description: Vorschlag, was die App besser machen würde · Suggest an improvement
+title: 'Idee: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du eine Idee teilst! · Thanks for sharing an idea!
+        Bitte keine persönlichen Daten oder Arbeitszeiten hier posten – dieser Beitrag ist öffentlich.
+        Please don't post personal data or your working hours here – this issue is public.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Deine Idee · Your idea
+      description: Was soll die App können? · What should the app do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Wofür brauchst du das? · Why would it help you?
+      description: Ein kurzes Beispiel aus deinem Alltag hilft sehr. · A short real-life example helps a lot.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: App & Gerät · App & device
+      description: Automatisch ausgefüllt · Filled in automatically
+    validations:
+      required: false

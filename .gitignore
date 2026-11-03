@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+*.local
+.vite
+coverage
+.claude
+# Company key for the n8n webhook: never commit it.
+FIRMENSCHLUESSEL*

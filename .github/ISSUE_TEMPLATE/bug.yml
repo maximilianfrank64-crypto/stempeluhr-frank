@@ -1,0 +1,39 @@
+name: 🐞 Fehler melden / Bug report
+description: Etwas funktioniert nicht wie erwartet · Something doesn't work as expected
+title: 'Fehler: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Melden! · Thanks for reporting!
+        Bitte keine persönlichen Daten oder Arbeitszeiten hier posten – dieser Beitrag ist öffentlich.
+        Please don't post personal data or your working hours here – this issue is public.
+  - type: textarea
+    id: what
+    attributes:
+      label: Was ist passiert? · What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Wie kann man es nachstellen? · How can it be reproduced?
+      placeholder: |
+        1. Einstempeln · Punch in
+        2. …
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Was hättest du erwartet? · What did you expect?
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: App & Gerät · App & device
+      description: Automatisch ausgefüllt · Filled in automatically
+    validations:
+      required: false
