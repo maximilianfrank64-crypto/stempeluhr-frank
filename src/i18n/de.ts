@@ -49,22 +49,23 @@ export const de: Messages = {
   'punch.event.breakStart': 'Pause gestartet',
   'punch.event.breakEnd': 'Pause beendet',
 
-  'daynote.today': 'Baustelle und Arbeiten heute (Pflicht)',
-  'daynote.label': 'Baustelle und Arbeiten',
+  'daynote.today': 'Arbeit und Positionen heute (Pflicht)',
+  'daynote.label': 'Arbeit und Positionen',
   'daynote.forDay': 'Notiz für {date}',
   'daynote.placeholder':
-    'Wo und was? z. B. Müller, Hauptstr. 5, Esslingen: Innenputz EG, Wohnzimmer und Flur',
+    'Was wurde gemacht? z. B. Innenputz EG, Wohnzimmer und Flur, Q3 spachteln',
   'daynote.add': 'Tagesnotiz hinzufügen',
   'daynote.edit': 'Tagesnotiz bearbeiten',
   'daynote.saved': 'Gespeichert',
   'address.label': 'Adresse der Baustelle',
   'address.recent': 'Zuletzt benutzte Adressen',
-  'address.placeholder': 'Straße, Hausnummer, Ort, z. B. Rohrer Straße 85, Stuttgart',
+  'address.placeholder':
+    'Straße, Hausnummer, Ort. Bei mehreren Parteien den Namen dahinter: Rohrer Straße 85, Stuttgart, Müller',
   'daynote.hint': 'Leer lassen, um die Notiz zu entfernen.',
 
-  'punchOut.title': 'Wo warst du heute und was hast du gemacht?',
+  'punchOut.title': 'Was hast du heute gemacht?',
   'punchOut.help':
-    'Ohne Eintrag geht das Ausstempeln nicht. Baustelle oder Kunde und welche Arbeiten du gemacht hast.',
+    'Ohne Eintrag geht das Ausstempeln nicht. Schreib jeden Tag neu, welche Arbeiten und Positionen du gemacht hast.',
   'punchOut.confirm': 'Speichern und ausstempeln',
 
   'sync.off': 'Stunden bleiben nur auf diesem Handy.',

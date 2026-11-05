@@ -134,19 +134,29 @@ async function geocode(helper, address, memo, cache) {
   if (cache[key]) return cache[key];
   if (key in memo) return memo[key];
   let result = null;
-  try {
-    await new Promise((r) => setTimeout(r, PRUEF.pauseGeocodeMs));
-    const res = await helper.httpRequest({
-      method: 'GET',
-      url: 'https://nominatim.openstreetmap.org/search',
-      qs: { format: 'json', limit: 1, countrycodes: 'de', q: address },
-      headers: { 'User-Agent': 'stempeluhr-frank-n8n' },
-      json: true,
-    });
-    const hit = Array.isArray(res) ? res[0] : null;
-    if (hit) result = { lat: Number(hit.lat), lon: Number(hit.lon) };
-  } catch (e) {
-    result = null;
+  // With several tenants the name is added behind the address ("Rohrer Straße 85, Stuttgart,
+  // Müller"). If that is not found, try again without the trailing parts.
+  const versuche = [address];
+  const teile = address.split(',').map((x) => x.trim()).filter(Boolean);
+  for (let n = teile.length - 1; n >= 2; n--) versuche.push(teile.slice(0, n).join(', '));
+  for (const q of versuche) {
+    try {
+      await new Promise((r) => setTimeout(r, PRUEF.pauseGeocodeMs));
+      const res = await helper.httpRequest({
+        method: 'GET',
+        url: 'https://nominatim.openstreetmap.org/search',
+        qs: { format: 'json', limit: 1, countrycodes: 'de', q },
+        headers: { 'User-Agent': 'stempeluhr-frank-n8n' },
+        json: true,
+      });
+      const hit = Array.isArray(res) ? res[0] : null;
+      if (hit) {
+        result = { lat: Number(hit.lat), lon: Number(hit.lon) };
+        break;
+      }
+    } catch (e) {
+      result = null;
+    }
   }
   memo[key] = result;
   if (result) cache[key] = result;
@@ -273,7 +283,7 @@ async function buildReport(rows, p, helper, cache) {
         s.autoClosed ? 'automatisch um 23:59 ausgestempelt, bitte nachfragen' : '',
         stillOpen ? 'nicht ausgestempelt, bitte nachfragen' : '',
         s.source === 'manual' ? 'von Hand nachgetragen' : '',
-        day.text === '' ? 'Baustelle/Arbeiten fehlen' : '',
+        day.text === '' ? 'Arbeit/Positionen fehlen' : '',
         firstOfDay && !day.rapport ? 'Rapport-Frage nicht beantwortet' : '',
         s.source === 'manual' ? '' : gpsHint(s.startLocation, 'Ein'),
         s.source === 'manual' || stillOpen || s.autoClosed ? '' : gpsHint(s.endLocation, 'Aus'),
@@ -289,7 +299,7 @@ async function buildReport(rows, p, helper, cache) {
           'Pause (Min)': s.breakMinutes,
           // An open shift has no reliable hours yet: left empty, see Hinweis.
           Stunden: stillOpen ? '' : s.workedHours,
-          'Baustelle und Arbeiten': day.text,
+          'Arbeit und Positionen': day.text,
           Adresse: day.address || '',
           'Rapport (Std)': rapport && rapport.done ? rapport.hours : rapport ? 0 : '',
           'Rapport Arbeiten': rapport && rapport.done ? rapport.text : '',
@@ -316,7 +326,7 @@ async function buildReport(rows, p, helper, cache) {
           Ende: '',
           'Pause (Min)': '',
           Stunden: round2(t.hours),
-          'Baustelle und Arbeiten': `${p.name} ${germanDate(p.from)} bis ${germanDate(p.to)}`,
+          'Arbeit und Positionen': `${p.name} ${germanDate(p.from)} bis ${germanDate(p.to)}`,
           Adresse: '',
           'Rapport (Std)': round2(t.rapport),
           'Rapport Arbeiten': '',

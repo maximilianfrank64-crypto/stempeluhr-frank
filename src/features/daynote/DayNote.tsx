@@ -163,6 +163,17 @@ export function PunchOutDialog({
   const [hours, setHours] = useState('');
   const [what, setWhat] = useState('');
 
+  const reset = () => {
+    setText('');
+    setAddress('');
+    setDone(null);
+    setHours('');
+    setWhat('');
+  };
+
+  // A new day always starts with an empty report: nothing is carried over from yesterday.
+  useEffect(reset, [date]);
+
   // Picks up a note that was still being saved from the home screen field.
   useEffect(() => {
     if (!open) return;
@@ -206,7 +217,12 @@ export function PunchOutDialog({
             type="button"
             className="btn btn-primary"
             disabled={!valid}
-            onClick={() => rapport && onConfirm(text, rapport, address.trim())}
+            onClick={() => {
+              if (!rapport) return;
+              onConfirm(text, rapport, address.trim());
+              // The dialog stays mounted: clear it so tomorrow's report starts empty.
+              reset();
+            }}
           >
             {t('punchOut.confirm')}
           </button>

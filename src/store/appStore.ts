@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { SYNC_URL } from '../config';
+import { recentAddresses } from '../core/addresses';
 import { mergeDayNotes, mergeShifts, retentionStart } from '../core/backup';
 import { dayKey } from '../core/periods';
 import * as punch from '../core/punch';
@@ -239,6 +240,13 @@ export const useApp = create<AppState>()((set, get) => {
 
     punchIn: guard(async () => {
       const next = await transition((a, now) => punch.punchIn(a, now, NO_ROUNDING));
+      // The job site stays from day to day (often a whole week); the report of the work does not.
+      const day = dayKey(next.start.raw);
+      const today = get().dayNotes[day];
+      const lastAddress = recentAddresses(get().dayNotes, 1)[0];
+      if (!today?.address && lastAddress) {
+        await get().setDayNote(day, today?.text ?? '', undefined, lastAddress);
+      }
       await queueShift(next);
       void locate(next.id, 'startLocation');
     }),

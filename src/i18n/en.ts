@@ -48,21 +48,22 @@ export const en = {
   'punch.event.breakStart': 'Break started',
   'punch.event.breakEnd': 'Break ended',
 
-  'daynote.today': 'Job site and work today (required)',
-  'daynote.label': 'Job site and work',
+  'daynote.today': 'Work and items today (required)',
+  'daynote.label': 'Work and items',
   'daynote.forDay': 'Note for {date}',
-  'daynote.placeholder': 'Where did you work? e.g. Miller, Main St 5, Esslingen – interior plaster',
+  'daynote.placeholder': 'What was done? e.g. interior plaster ground floor, skim coat Q3',
   'daynote.add': 'Add day note',
   'daynote.edit': 'Edit day note',
   'daynote.saved': 'Saved',
   'address.label': 'Job site address',
   'address.recent': 'Recently used addresses',
-  'address.placeholder': 'Street, number, town, e.g. Rohrer Strasse 85, Stuttgart',
+  'address.placeholder':
+    'Street, number, town. With several tenants add the name: Rohrer Strasse 85, Stuttgart, Miller',
   'daynote.hint': 'Leave empty to remove the note.',
 
-  'punchOut.title': 'Where were you today and what did you do?',
+  'punchOut.title': 'What did you do today?',
   'punchOut.help':
-    'You can only punch out with an entry. Job site or customer, and briefly what was done.',
+    'You can only punch out with an entry. Write anew every day which work and items you did.',
   'punchOut.confirm': 'Save and punch out',
 
   'sync.off': 'Hours stay on this phone only.',

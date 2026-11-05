@@ -38,7 +38,7 @@ Blatt `Stunden`, eine Zeile pro Schicht. Am Ende jedes Mitarbeiters steht eine Z
 | Beginn, Ende | exakte Uhrzeit, **nicht gerundet** |
 | Pause (Min) | Pause in Minuten, inklusive automatischem Pausenabzug, falls eingeschaltet |
 | Stunden | Arbeitszeit dezimal (7,5 = 7 Std 30 Min); leer, wenn nicht ausgestempelt |
-| Baustelle und Arbeiten | wo gearbeitet wurde und was gemacht wurde (Pflichtfeld) |
+| Arbeit und Positionen | was gemacht wurde, jeden Tag neu geschrieben (Pflichtfeld). Die Baustelle steht in „Adresse“ |
 | Adresse | Adresse der Baustelle, wie der Mitarbeiter sie eingetragen hat |
 | Ortsprüfung | Ergebnis der automatischen Ortsprüfung, siehe unten |
 | Rapport (Std) | Rapportarbeiten des Tages in Stunden; `0` = Mitarbeiter hat bewusst „Nein“ gesagt |
@@ -56,9 +56,9 @@ Rapport steht nur in der ersten Zeile eines Tages, auch wenn jemand mehrmals ges
    Baustelle, Stunden. Nach Baustelle gruppieren, wenn Werner das so einträgt.
 3. **Rapportarbeiten getrennt auflisten:** Mitarbeiter, Datum, Baustelle, Rapport-Stunden,
    Rapport-Arbeiten. Rapport ist abrechenbare Zusatzarbeit und darf nicht untergehen. Sie
-   gehört zur Baustelle aus „Baustelle und Arbeiten“ desselben Tages.
+   gehört zur Baustelle aus „Adresse“ desselben Tages.
 4. **Zeilen mit Hinweis nicht eintragen**, sondern Werner als Nachfrage-Liste geben:
-   Mitarbeiter, Datum, Hinweis, und was in „Baustelle und Arbeiten“ steht.
+   Mitarbeiter, Datum, Hinweis, und was in „Adresse“ und „Arbeit und Positionen“ steht.
 5. **Ortsprüfung** auswerten (siehe unten): `AUFFÄLLIG` und `nicht möglich` in die Nachfrage-Liste.
 6. Erst wenn Werner die Liste bestätigt hat, in WinWorker eintragen oder ihm beim Eintragen
    helfen.
@@ -70,10 +70,10 @@ wird, legt Werner fest. Frag ihn beim ersten Mal und merk dir seine Regel.
 
 | Hinweis | Was tun |
 | --- | --- |
-| automatisch um 23:59 ausgestempelt, bitte nachfragen | Mitarbeiter hat vergessen auszustempeln. Oft steht die echte Endzeit in „Baustelle und Arbeiten“. Werner fragen, welche Zeit gilt. |
+| automatisch um 23:59 ausgestempelt, bitte nachfragen | Mitarbeiter hat vergessen auszustempeln. Oft steht die echte Endzeit in „Arbeit und Positionen“. Werner fragen, welche Zeit gilt. |
 | nicht ausgestempelt, bitte nachfragen | Handy wurde seitdem nicht mehr geöffnet, Ende unbekannt. Nachfragen. |
 | von Hand nachgetragen | Zeit wurde in der App nachträglich eingetragen, nicht gestempelt. Plausibel prüfen. |
-| Baustelle/Arbeiten fehlen | Kommt selten vor, weil das Feld Pflicht ist. Nachfragen, wo gearbeitet wurde. |
+| Arbeit/Positionen fehlen | Kommt selten vor, weil das Feld Pflicht ist. Nachfragen, was gemacht wurde. |
 | Rapport-Frage nicht beantwortet | Unklar, ob es Rapport gab. Nachfragen. |
 | Ein/Aus: Standort abgelehnt | Mitarbeiter hat den Standort am Handy nicht erlaubt. Werner darauf hinweisen. |
 | Ein/Aus: kein GPS | Kein Signal beim Stempeln. Einmal ist normal, ständig nicht. |

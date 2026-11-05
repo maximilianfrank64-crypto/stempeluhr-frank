@@ -156,6 +156,14 @@ describe('sending to the office', () => {
     expect(useApp.getState().dayNotes['2026-10-15']).toBeUndefined();
   });
 
+  it('punching in on a new day keeps the last address but not the work report', async () => {
+    await useApp.getState().setDayNote('2026-01-05', 'Q3 gespachtelt', { done: false }, 'Rohrer Straße 85, Stuttgart');
+    await useApp.getState().punchIn();
+    const today = Object.values(useApp.getState().dayNotes).find((n) => n.date !== '2026-01-05');
+    expect(today).toMatchObject({ address: 'Rohrer Straße 85, Stuttgart', text: '' });
+    expect(today?.rapport).toBeUndefined();
+  });
+
   it('keeps records when offline and sends only the newest state later', async () => {
     await setUp();
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
