@@ -1,8 +1,13 @@
 // n8n Code node "Bericht bauen" (Mode: Run Once for All Items), JavaScript.
 // Input: all rows of the Data Table "stempel". The workflow runs every day at 23:58
 // and 23:59 (Berlin). At 23:58 it builds the month list on the last day of a month,
-// at 23:59 the week list on a Friday (Saturday to Friday); otherwise no output, and
-// the workflow stops. One file per run, so a Friday that ends a month gives two files.
+// at 23:59 the week list on a Friday (Saturday to Friday) and the "Nachtrag" on a Sunday;
+// otherwise no output, and the workflow stops. One file per run, so a Friday that ends a
+// month gives two files.
+// Late records: a phone without network sends its punches later. The Friday list therefore
+// also contains shifts of EARLIER weeks that arrived since the Sunday run ("nachgereicht").
+// The Sunday "Nachtrag" contains everything that arrived or changed since Friday 23:59 and is
+// only sent when there is something (no empty mails).
 // Output: one item per Excel row for "Convert to File" (XLSX). The file name goes to
 // $execution.customData "datei" for the mail attachment.
 // Times are exact clock times; rounding, targets and pay are decided in the office.
@@ -22,7 +27,11 @@ const PRUEF = {
   spaetNach: '17:00', // Ausstempeln danach: immer pruefen
   langStunden: 9, // mehr Stunden als das: immer pruefen
   pauseGeocodeMs: 1100, // Nominatim erlaubt hoechstens 1 Anfrage pro Sekunde
+  fehlendWochen: 8, // "Keine Stempel": wer in den letzten n Wochen gestempelt hat, diese aber nicht
 };
+// Namen, die NICHT als "keine Stempel" gemeldet werden (so geschrieben wie in der App),
+// z. B. wer nur gelegentlich mitstempelt.
+const NICHT_MELDEN = ['Maximilian Frank'];
 // Feste Orte. Namen wie in der App (Schnellauswahl). Adresse eintragen; die Koordinaten
 // werden daraus einmal bestimmt und gemerkt. Wer lat/lon schon kennt, traegt sie ein.
 // Wichtig: nur die tatsaechlich angefahrenen Filialen eintragen.
@@ -56,14 +65,53 @@ const weekday = (day) => new Date(`${day}T12:00:00Z`).getUTCDay(); // 0 = Sunday
 const germanDate = (day) => day.split('-').reverse().join('.');
 const round2 = (h) => Math.round(h * 100) / 100;
 
-/** The period this run reports on, or null. Month run: last day. Week run: Friday. */
+/** Sortable Berlin time of an instant: "2026-11-06T23:59:00". Used to compare arrival times. */
+function berlinKey(iso) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(iso));
+  const g = (t) => parts.find((x) => x.type === t).value;
+  return `${g('year')}-${g('month')}-${g('day')}T${g('hour')}:${g('minute')}:${g('second')}`;
+}
+
+/**
+ * The period this run reports on, or null. Month run: last day. Week run: Friday.
+ * Sunday run ("Nachtrag"): what arrived since Friday 23:59.
+ * `spaetSeit`: on Fridays, shifts of earlier weeks that arrived after this moment are added.
+ * `seit`: for the Nachtrag, everything that arrived after this moment.
+ */
 function duePeriod(today, monthRun) {
   if (monthRun) {
     return addDays(today, 1).slice(8) === '01'
       ? { name: 'Monat', from: `${today.slice(0, 8)}01`, to: today }
       : null;
   }
-  return weekday(today) === 5 ? { name: 'Woche', from: addDays(today, -6), to: today } : null;
+  const wd = weekday(today);
+  if (wd === 5) {
+    return {
+      name: 'Woche',
+      from: addDays(today, -6),
+      to: today,
+      spaetSeit: `${addDays(today, -5)}T23:59:00`, // after last Sunday's run
+    };
+  }
+  if (wd === 0) {
+    return {
+      name: 'Nachtrag',
+      from: addDays(today, -2),
+      to: today,
+      nachtrag: true,
+      seit: `${addDays(today, -2)}T23:59:00`, // after Friday's run
+    };
+  }
+  return null;
 }
 
 const mapsLink = (loc) =>
@@ -219,15 +267,25 @@ async function buildReport(rows, p, helper, cache) {
     // An empty table still yields one empty item (alwaysOutputData on the table node).
     if (!r || typeof r.data !== 'string') continue;
     const item = JSON.parse(r.data);
-    if (r.kind === 'shift') shifts.push({ ...item, employee: r.employee, deviceId: r.deviceId });
+    if (r.kind === 'shift') {
+      shifts.push({ ...item, employee: r.employee, deviceId: r.deviceId, receivedAt: r.receivedAt });
+    }
     // (older notes have no "address" field: they simply count as "no address")
     if (r.kind === 'dayNote') days.set(`${r.deviceId}|${item.date}`, item);
   }
 
   const out = [];
   {
+    const arrivedAfter = (s, key) => !!s.receivedAt && berlinKey(s.receivedAt) > key;
+    // Shifts of earlier weeks that only arrived now (phone had no network on Friday).
+    const isLate = (s) => (p.nachtrag ? true : s.date < p.from);
     const inRange = shifts
-      .filter((s) => s.date >= p.from && s.date <= p.to)
+      .filter((s) =>
+        p.nachtrag
+          ? arrivedAfter(s, p.seit)
+          : (s.date >= p.from && s.date <= p.to) ||
+            (!!p.spaetSeit && s.date < p.from && arrivedAfter(s, p.spaetSeit)),
+      )
       .sort((a, b) => a.employee.localeCompare(b.employee, 'de') || a.start.localeCompare(b.start));
 
     // Which shifts get a location check, and the places needed for it (looked up once each).
@@ -279,6 +337,11 @@ async function buildReport(rows, p, helper, cache) {
       }
 
       const hints = [
+        isLate(s)
+          ? p.nachtrag
+            ? 'nachgereicht oder geändert seit der letzten Liste'
+            : `nachgereicht (gehört zum ${germanDate(s.date)}, kam nach der letzten Liste)`
+          : '',
         ortHinweis,
         s.autoClosed ? 'automatisch um 23:59 ausgestempelt, bitte nachfragen' : '',
         stillOpen ? 'nicht ausgestempelt, bitte nachfragen' : '',
@@ -336,6 +399,42 @@ async function buildReport(rows, p, helper, cache) {
           Hinweis: '',
         },
       });
+    }
+    // Friday list only: who stamped in the weeks before but not this week. The names come
+    // from the records themselves, nobody has to keep a list of employees.
+    if (p.name === 'Woche' && out.length > 0) {
+      const lookback = addDays(p.from, -7 * PRUEF.fehlendWochen);
+      const inWeek = new Set();
+      const before = new Set();
+      for (const s of shifts) {
+        if (s.date >= p.from && s.date <= p.to) inWeek.add(s.employee);
+        else if (s.date >= lookback && s.date < p.from) before.add(s.employee);
+      }
+      const ignore = new Set(NICHT_MELDEN.map((n) => n.toLowerCase()));
+      const fehlen = [...before]
+        .filter((n) => !inWeek.has(n) && !ignore.has(n.toLowerCase()))
+        .sort((a, b) => a.localeCompare(b, 'de'));
+      if (fehlen.length) {
+        out.push({
+          json: {
+            Mitarbeiter: 'HINWEIS',
+            Datum: 'Keine Stempel diese Woche',
+            Tag: '',
+            Beginn: '',
+            Ende: '',
+            'Pause (Min)': '',
+            Stunden: '',
+            'Arbeit und Positionen': `${fehlen.join(', ')}: in den letzten ${PRUEF.fehlendWochen} Wochen gestempelt, diese Woche nicht (Urlaub, krank, Handy ohne Netz oder vergessen; kommen die Stempel noch, steht es im Nachtrag)`,
+            Adresse: '',
+            'Rapport (Std)': '',
+            'Rapport Arbeiten': '',
+            'GPS Ein': '',
+            'GPS Aus': '',
+            Ortsprüfung: '',
+            Hinweis: '',
+          },
+        });
+      }
     }
   }
   return out;

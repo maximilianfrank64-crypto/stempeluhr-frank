@@ -14,6 +14,20 @@ das ist normal:
 - **Wochenliste:** jeden **Freitag um 23:59 Uhr**, Samstag bis Freitag.
   Betreff: `Stempeluhr: Stunden Woche <von> bis <bis>`
   Anhang: `Stunden_Woche_<von>_bis_<bis>.xlsx`, z. B. `Stunden_Woche_2026-10-31_bis_2026-11-06.xlsx`
+  Sie enthält auch Schichten **früherer Wochen**, die erst nach der letzten Liste angekommen
+  sind (Handy hatte kein Netz). Diese Zeilen tragen den Hinweis „nachgereicht“. Trag sie ganz
+  normal ein, sie gehören zu dem Datum, das in der Zeile steht.
+  Ganz unten steht ggf. eine Zeile `HINWEIS` / „Keine Stempel diese Woche“ mit den Namen
+  derer, die in den letzten 8 Wochen gestempelt haben, diese Woche aber nicht. Gib sie Werner
+  als Nachfrage-Liste weiter (Urlaub, krank, Handy ohne Netz oder vergessen). Eine Liste
+  aller Mitarbeiter brauchst du dafür nicht, die Namen ergeben sich aus den Stempeln selbst.
+- **Nachtrag:** jeden **Sonntag um 23:59 Uhr**, aber nur, wenn seit Freitag 23:59 etwas
+  angekommen ist oder sich geändert hat. Sonst kommt keine Mail.
+  Betreff: `Stempeluhr: Stunden Nachtrag <von> bis <bis>`
+  Anhang: `Stunden_Nachtrag_<von>_bis_<bis>.xlsx`
+  Der Nachtrag ist eine **Ergänzung** zur Wochenliste: Zeilen, die schon in der Wochenliste
+  standen und hier mit „nachgereicht oder geändert“ wieder auftauchen, ersetzen die alte
+  Zeile (zum Beispiel weil jemand einen Eintrag korrigiert hat). Nicht doppelt eintragen.
 - **Monatsliste:** am **letzten Tag des Monats um 23:58 Uhr**, egal welcher Wochentag.
   Betreff: `Stempeluhr: Stunden Monat <von> bis <bis>`
   Anhang: `Stunden_Monat_<von>_bis_<bis>.xlsx`
