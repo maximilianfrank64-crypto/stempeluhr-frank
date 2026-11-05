@@ -52,12 +52,14 @@ describe('sync', () => {
     expect(
       dayNoteItem('2026-10-12', {
         ...note('2026-10-12', 'Müller'),
+        address: 'Hauptstr. 5, Esslingen',
         rapport: { done: true, hours: 2, text: 'Treppenhaus' },
       }),
     ).toEqual({
       kind: 'dayNote',
       date: '2026-10-12',
       text: 'Müller',
+      address: 'Hauptstr. 5, Esslingen',
       rapport: { done: true, hours: 2, text: 'Treppenhaus' },
     });
     expect(dayNoteItem('2026-10-12', undefined)).toMatchObject({ text: '', rapport: null });

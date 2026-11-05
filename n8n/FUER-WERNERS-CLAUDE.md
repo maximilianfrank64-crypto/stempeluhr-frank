@@ -8,7 +8,8 @@ Hilfe.
 
 Die Mitarbeiter stempeln mit der App „Stempeluhr Frank“ auf dem Handy ein und aus. Jeder
 Stempel geht automatisch an n8n. n8n schickt daraus Excel-Listen **per E-Mail an Werner**,
-von seiner eigenen Adresse an seine eigene Adresse:
+an Werners Adresse (info@stukkateur-frank.de). Der Absender kann Maxens Gmail-Adresse sein,
+das ist normal:
 
 - **Wochenliste:** jeden **Freitag um 23:59 Uhr**, Samstag bis Freitag.
   Betreff: `Stempeluhr: Stunden Woche <von> bis <bis>`
@@ -38,6 +39,8 @@ Blatt `Stunden`, eine Zeile pro Schicht. Am Ende jedes Mitarbeiters steht eine Z
 | Pause (Min) | Pause in Minuten, inklusive automatischem Pausenabzug, falls eingeschaltet |
 | Stunden | Arbeitszeit dezimal (7,5 = 7 Std 30 Min); leer, wenn nicht ausgestempelt |
 | Baustelle und Arbeiten | wo gearbeitet wurde und was gemacht wurde (Pflichtfeld) |
+| Adresse | Adresse der Baustelle, wie der Mitarbeiter sie eingetragen hat |
+| Ortsprüfung | Ergebnis der automatischen Ortsprüfung, siehe unten |
 | Rapport (Std) | Rapportarbeiten des Tages in Stunden; `0` = Mitarbeiter hat bewusst „Nein“ gesagt |
 | Rapport Arbeiten | was als Rapport gemacht wurde |
 | GPS Ein, GPS Aus | Google-Maps-Link zum Standort beim Ein- und Ausstempeln |
@@ -56,7 +59,7 @@ Rapport steht nur in der ersten Zeile eines Tages, auch wenn jemand mehrmals ges
    gehört zur Baustelle aus „Baustelle und Arbeiten“ desselben Tages.
 4. **Zeilen mit Hinweis nicht eintragen**, sondern Werner als Nachfrage-Liste geben:
    Mitarbeiter, Datum, Hinweis, und was in „Baustelle und Arbeiten“ steht.
-5. **GPS-Stichprobe** (siehe unten).
+5. **Ortsprüfung** auswerten (siehe unten): `AUFFÄLLIG` und `nicht möglich` in die Nachfrage-Liste.
 6. Erst wenn Werner die Liste bestätigt hat, in WinWorker eintragen oder ihm beim Eintragen
    helfen.
 
@@ -76,18 +79,28 @@ wird, legt Werner fest. Frag ihn beim ersten Mal und merk dir seine Regel.
 | Ein/Aus: kein GPS | Kein Signal beim Stempeln. Einmal ist normal, ständig nicht. |
 | Standort ungenau (… m) | GPS war ungenau, die Stichprobe ist dann wenig aussagekräftig. |
 
-## GPS-Stichprobe
+## Ortsprüfung (macht n8n, nicht du)
 
-Ziel: grob prüfen, ob auf der Baustelle gestempelt wurde, auf der laut Notiz gearbeitet
-wurde. Das ist eine Stichprobe, keine Überwachung jedes Stempels.
+Die App schickt Adresse und GPS mit. **n8n prüft selbst**, ob der Stempel in der Nähe der
+Adresse oder eines festen Orts (Lagerplatz, Wölpert, Fendal, Kemmler) war, und schreibt das
+Ergebnis in die Spalten `Ortsprüfung` und `Hinweis`. Du musst keine Karten-Links öffnen.
 
-- Nimm pro Liste ein paar Zeilen, nicht alle. Das spart Kosten und Zeit.
-- Öffne den Link in „GPS Ein“ und vergleiche den Ort mit der Adresse in „Baustelle und
-  Arbeiten“.
-- Melde Werner nur auffällige Fälle, also mehr als etwa 1 km Abstand zur Baustelle. Nenne
-  Mitarbeiter, Datum, Baustelle und Link.
+Geprüft wird **immer** bei Einstempeln vor 7:30, Ausstempeln nach 17:00 oder mehr als 9
+Stunden, sonst nur bei etwa jeder 5. Schicht (Stichprobe). Leere Spalte = nicht geprüft.
+
+| Ortsprüfung | Bedeutung |
+| --- | --- |
+| leer | nicht geprüft (kein Grund, nicht in der Stichprobe) |
+| OK (Grund) | geprüft, Stempel war an der Baustelle oder an einem festen Ort. Steht „Ein bei Wölpert“ dabei, hat der Mitarbeiter dort gestempelt (Material geholt), das ist in Ordnung und keine Nachfrage wert |
+| AUFFÄLLIG | weder an der Adresse noch an einem festen Ort; im Hinweis steht der Abstand |
+| nicht möglich | Prüfung war fällig, ging aber nicht (keine Adresse, Adresse nicht gefunden, kein GPS) |
+
+- Zeilen mit `AUFFÄLLIG` gehören auf die Nachfrage-Liste für Werner: Mitarbeiter, Datum,
+  Adresse, Abstand, GPS-Link. Mehr nicht.
 - Sei vorsichtig mit Vorwürfen: Material holen, Zweitbaustelle oder ungenaues GPS sind
   normale Gründe. Du meldest nur, Werner entscheidet.
+- Stempeln beim Großhändler oder am Lagerplatz zählt als **normale Arbeitszeit**.
+- Eigene Stichproben mit den GPS-Links sind nur nötig, wenn Werner es ausdrücklich möchte.
 
 ## Datenschutz
 

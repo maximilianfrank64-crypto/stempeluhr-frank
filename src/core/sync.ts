@@ -28,7 +28,14 @@ export type SyncItem =
       endLocation: GeoResult | null;
     }
   | { kind: 'shiftDeleted'; id: string }
-  | { kind: 'dayNote'; date: string; text: string; rapport: Rapport | null };
+  | {
+      kind: 'dayNote';
+      date: string;
+      text: string;
+      /** Job site address as typed; '' when none. The workflow checks it against the GPS. */
+      address: string;
+      rapport: Rapport | null;
+    };
 
 export interface SyncMessage {
   v: 1;
@@ -70,7 +77,13 @@ export function shiftItem(shift: Shift, settings: Settings, now: number): SyncIt
 }
 
 export function dayNoteItem(date: string, note: DayNote | undefined): SyncItem {
-  return { kind: 'dayNote', date, text: note?.text ?? '', rapport: note?.rapport ?? null };
+  return {
+    kind: 'dayNote',
+    date,
+    text: note?.text ?? '',
+    address: note?.address ?? '',
+    rapport: note?.rapport ?? null,
+  };
 }
 
 export function syncMessage(

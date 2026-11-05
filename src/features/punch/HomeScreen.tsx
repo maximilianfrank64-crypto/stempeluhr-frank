@@ -9,7 +9,7 @@ import { selectActive, useApp } from '../../store/appStore';
 import { useNow, useSettings, useT } from '../../ui/hooks';
 import { Icon } from '../../ui/icons';
 import { needsPunchOutAnswers } from '../../core/sync';
-import { DayNoteField, PunchOutDialog } from '../daynote/DayNote';
+import { DayAddressField, DayNoteField, PunchOutDialog } from '../daynote/DayNote';
 import { SyncStatus } from '../sync/SyncStatus';
 
 function StampTime({ stamp, timeFormat }: { stamp: Stamp; timeFormat: '12h' | '24h' }) {
@@ -156,6 +156,7 @@ export function HomeScreen() {
         )}
       </div>
 
+      <DayAddressField date={noteDate} />
       <DayNoteField date={noteDate} label={t('daynote.today')} />
       <SyncStatus />
 
@@ -163,10 +164,10 @@ export function HomeScreen() {
         date={noteDate}
         open={askNote}
         onCancel={() => setAskNote(false)}
-        onConfirm={(text, rapport) => {
+        onConfirm={(text, rapport, address) => {
           setAskNote(false);
           void run(async () => {
-            await setDayNote(noteDate, text, rapport);
+            await setDayNote(noteDate, text, rapport, address);
             await punchOut();
           })();
         }}

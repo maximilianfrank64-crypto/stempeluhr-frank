@@ -108,7 +108,9 @@ describe('sending to the office', () => {
   it('punches and notes are sent with name, device and key header', async () => {
     await setUp();
     await useApp.getState().punchIn();
-    await useApp.getState().setDayNote('2026-10-14', 'Müller, Esslingen', { done: false });
+    await useApp
+      .getState()
+      .setDayNote('2026-10-14', 'Müller, Esslingen', { done: false }, 'Hauptstr. 5, Esslingen');
     await vi.waitFor(async () => expect(await db.outbox.count()).toBe(0));
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('https://n8n.test/webhook/stempel');
@@ -118,6 +120,7 @@ describe('sending to the office', () => {
       kind: 'dayNote',
       date: '2026-10-14',
       text: 'Müller, Esslingen',
+      address: 'Hauptstr. 5, Esslingen',
       rapport: { done: false },
     });
     // No GPS in the test runtime: recorded as such, never left out silently.
@@ -137,6 +140,20 @@ describe('sending to the office', () => {
       text: 'Müller, Esslingen',
       rapport: { done: true, hours: 1.5, text: 'Treppenhaus' },
     });
+  });
+
+  it('the address is kept when only the note changes, and an address alone is a note', async () => {
+    await useApp.getState().setDayNote('2026-10-15', '', undefined, 'Rohrer Straße 85, Stuttgart');
+    expect(useApp.getState().dayNotes['2026-10-15']).toMatchObject({
+      address: 'Rohrer Straße 85, Stuttgart',
+    });
+    await useApp.getState().setDayNote('2026-10-15', 'Innenputz');
+    expect(useApp.getState().dayNotes['2026-10-15']).toMatchObject({
+      text: 'Innenputz',
+      address: 'Rohrer Straße 85, Stuttgart',
+    });
+    await useApp.getState().setDayNote('2026-10-15', '', undefined, '');
+    expect(useApp.getState().dayNotes['2026-10-15']).toBeUndefined();
   });
 
   it('keeps records when offline and sends only the newest state later', async () => {

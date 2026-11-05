@@ -57,6 +57,9 @@ export const de: Messages = {
   'daynote.add': 'Tagesnotiz hinzufügen',
   'daynote.edit': 'Tagesnotiz bearbeiten',
   'daynote.saved': 'Gespeichert',
+  'address.label': 'Adresse der Baustelle',
+  'address.recent': 'Zuletzt benutzte Adressen',
+  'address.placeholder': 'Straße, Hausnummer, Ort, z. B. Rohrer Straße 85, Stuttgart',
   'daynote.hint': 'Leer lassen, um die Notiz zu entfernen.',
 
   'punchOut.title': 'Wo warst du heute und was hast du gemacht?',

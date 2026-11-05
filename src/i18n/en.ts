@@ -55,6 +55,9 @@ export const en = {
   'daynote.add': 'Add day note',
   'daynote.edit': 'Edit day note',
   'daynote.saved': 'Saved',
+  'address.label': 'Job site address',
+  'address.recent': 'Recently used addresses',
+  'address.placeholder': 'Street, number, town, e.g. Rohrer Strasse 85, Stuttgart',
   'daynote.hint': 'Leave empty to remove the note.',
 
   'punchOut.title': 'Where were you today and what did you do?',

@@ -39,10 +39,12 @@ function parseDayNotes(v: unknown, now: number): DayNote[] {
     if (!isObj(n) || typeof n.date !== 'string' || !isValidDayKey(n.date)) continue;
     const text = typeof n.text === 'string' ? n.text : '';
     const rapport = parseRapport(n.rapport);
-    if (text.trim() === '' && !rapport) continue;
+    const address = typeof n.address === 'string' ? n.address.trim().slice(0, 200) : '';
+    if (text.trim() === '' && !rapport && address === '') continue;
     out.set(n.date, {
       date: n.date,
       text,
+      ...(address !== '' && { address }),
       ...(rapport && { rapport }),
       updatedAt: isTime(n.updatedAt) ? n.updatedAt : now,
     });

@@ -117,7 +117,9 @@ const mailNode = {
   typeVersion: 2.1,
   position: [1200, 0],
   parameters: {
-    fromEmail: WERNER_EMAIL,
+    // Sender = the mailbox the SMTP credential belongs to. With Max's Gmail as sender, run:
+    //   $env:MAIL_VON = 'maximilian.frank64@gmail.com'; node n8n/aufbau.mjs
+    fromEmail: process.env.MAIL_VON || WERNER_EMAIL,
     toEmail: WERNER_EMAIL,
     subject: "={{ 'Stempeluhr: ' + $json.datei.replace('.xlsx', '').replaceAll('_', ' ') }}",
     emailFormat: 'text',

@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { recentAddresses } from '../../core/addresses';
 import { formatDateLong } from '../../core/format';
 import { rapportComplete } from '../../core/sync';
 import type { Rapport } from '../../core/types';
@@ -55,6 +56,91 @@ export function DayNoteField({ date, label }: { date: string; label: string }) {
 }
 
 /**
+ * Address of the job site, free text. The app only records it; the office workflow
+ * looks it up and compares it with the GPS. Below the field: the addresses this phone
+ * used most recently, one tap to use one again (no shared or predefined list).
+ */
+export function AddressInput({
+  value,
+  onChange,
+  onPick,
+  onBlur,
+  id,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  /** A recent address was tapped (defaults to onChange). */
+  onPick?: (v: string) => void;
+  onBlur?: () => void;
+  id: string;
+}) {
+  const t = useT();
+  const dayNotes = useApp((s) => s.dayNotes);
+  const recent = useMemo(() => recentAddresses(dayNotes), [dayNotes]);
+  return (
+    <div className="field address-field">
+      <label htmlFor={id}>{t('address.label')}</label>
+      {recent.length > 0 && (
+        <div className="chips" role="group" aria-label={t('address.recent')}>
+          {recent.map((a) => (
+            <button
+              key={a}
+              type="button"
+              className={a === value.trim() ? 'chip active' : 'chip'}
+              aria-pressed={a === value.trim()}
+              onClick={() => (onPick ?? onChange)(a)}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+      )}
+      <input
+        id={id}
+        type="text"
+        autoComplete="street-address"
+        value={value}
+        placeholder={t('address.placeholder')}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+      />
+    </div>
+  );
+}
+
+/** Address of the day on the home screen; saves when the field loses focus. */
+export function DayAddressField({ date }: { date: string }) {
+  const id = useId();
+  const stored = useApp((s) => s.dayNotes[date]?.address ?? '');
+  const setDayNote = useApp((s) => s.setDayNote);
+  const [value, setValue] = useState(stored);
+  const latest = useRef(value);
+  latest.current = value;
+
+  useEffect(() => setValue(stored), [stored, date]);
+
+  const saveValue = (raw: string) => {
+    const v = raw.trim();
+    if (v !== stored) {
+      void setDayNote(date, useApp.getState().dayNotes[date]?.text ?? '', undefined, v);
+    }
+  };
+
+  return (
+    <AddressInput
+      id={id}
+      value={value}
+      onChange={setValue}
+      onPick={(v) => {
+        setValue(v);
+        saveValue(v);
+      }}
+      onBlur={() => saveValue(latest.current)}
+    />
+  );
+}
+
+/**
  * Asked on punch out until the day has both answers: where was the work done,
  * and were there Rapport hours? Punching out is only possible with both.
  */
@@ -67,11 +153,12 @@ export function PunchOutDialog({
   date: string;
   open: boolean;
   onCancel: () => void;
-  onConfirm: (text: string, rapport: Rapport) => void;
+  onConfirm: (text: string, rapport: Rapport, address: string) => void;
 }) {
   const t = useT();
   const stored = useApp((s) => s.dayNotes[date]);
   const [text, setText] = useState('');
+  const [address, setAddress] = useState('');
   const [done, setDone] = useState<boolean | null>(null);
   const [hours, setHours] = useState('');
   const [what, setWhat] = useState('');
@@ -80,6 +167,7 @@ export function PunchOutDialog({
   useEffect(() => {
     if (!open) return;
     setText((cur) => (cur.trim() === '' ? (stored?.text ?? '') : cur));
+    setAddress((cur) => (cur.trim() === '' ? (stored?.address ?? '') : cur));
     const r = stored?.rapport;
     if (r && done === null) {
       setDone(r.done);
@@ -118,13 +206,15 @@ export function PunchOutDialog({
             type="button"
             className="btn btn-primary"
             disabled={!valid}
-            onClick={() => rapport && onConfirm(text, rapport)}
+            onClick={() => rapport && onConfirm(text, rapport, address.trim())}
           >
             {t('punchOut.confirm')}
           </button>
         </>
       }
     >
+      <AddressInput id="punch-out-address" value={address} onChange={setAddress} />
+
       <div className="field">
         <label htmlFor="punch-out-note">{t('daynote.label')}</label>
         <textarea

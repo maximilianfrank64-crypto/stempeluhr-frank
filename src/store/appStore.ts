@@ -59,10 +59,15 @@ interface AppState {
   saveShift: (shift: Shift) => Promise<void>;
   removeShift: (id: string) => Promise<void>;
   /**
-   * Set the note for a day; `rapport` sets the Rapport answer (omitted = keep it).
-   * Empty text without a Rapport answer removes the note.
+   * Set the note for a day; `rapport` and `address` set those answers (omitted = keep them).
+   * Empty text without a Rapport answer and without an address removes the note.
    */
-  setDayNote: (date: string, text: string, rapport?: Rapport) => Promise<void>;
+  setDayNote: (
+    date: string,
+    text: string,
+    rapport?: Rapport,
+    address?: string,
+  ) => Promise<void>;
   updateSettings: (patch: Partial<Settings>) => Promise<void>;
   restore: (
     backup: { shifts: Shift[]; dayNotes: DayNote[]; settings: Settings | null },
@@ -261,10 +266,11 @@ export const useApp = create<AppState>()((set, get) => {
       await queue([{ kind: 'shiftDeleted', id }]);
     }),
 
-    setDayNote: guard(async (date, text, rapport) => {
+    setDayNote: guard(async (date, text, rapport, address) => {
       const clean = text.trim();
       const kept = rapport ?? get().dayNotes[date]?.rapport;
-      if (clean === '' && !kept) {
+      const addr = (address ?? get().dayNotes[date]?.address ?? '').trim().slice(0, 200);
+      if (clean === '' && !kept && addr === '') {
         await repo.deleteDayNote(date);
         set((s) => {
           const rest = { ...s.dayNotes };
@@ -275,6 +281,7 @@ export const useApp = create<AppState>()((set, get) => {
         const note: DayNote = {
           date,
           text: clean,
+          ...(addr !== '' && { address: addr }),
           ...(kept && { rapport: kept }),
           updatedAt: Date.now(),
         };

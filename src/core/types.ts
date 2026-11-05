@@ -111,6 +111,10 @@ export interface DayNote {
   /** Local day key, yyyy-MM-dd. */
   date: string;
   text: string;
+  /**
+   * Job site address as free text. Only recorded and sent; the office workflow looks it up and compares it with the GPS.
+   */
+  address?: string;
   /** Absent until answered (e.g. days recorded before this existed). */
   rapport?: Rapport;
   updatedAt: number;
