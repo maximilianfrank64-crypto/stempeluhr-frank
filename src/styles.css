@@ -996,6 +996,68 @@ fieldset {
 .rapport textarea {
   margin-bottom: 8px;
 }
+.photos {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+.photos-label {
+  font-weight: 600;
+}
+.photo-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.photo {
+  position: relative;
+  width: 84px;
+  height: 84px;
+}
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border, #ccc);
+}
+.photo-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: #333;
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.photo-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border: 2px dashed var(--border, #999);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: center;
+}
+.photo-add input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.photo-add:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 .period-nav {
   display: flex;
   align-items: center;

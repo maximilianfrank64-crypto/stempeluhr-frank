@@ -65,6 +65,17 @@ describe('sync', () => {
     expect(dayNoteItem('2026-10-12', undefined)).toMatchObject({ text: '', rapport: null });
   });
 
+  it('Rapport photos are sent along with the day note, and are optional', () => {
+    const photo = 'data:image/jpeg;base64,/9j/4AAQ';
+    const withPhoto = dayNoteItem('2026-10-12', {
+      ...note('2026-10-12', 'Müller'),
+      rapport: { done: true, hours: 2, text: 'Treppenhaus', photos: [photo] },
+    });
+    expect(withPhoto).toMatchObject({ rapport: { photos: [photo] } });
+    expect(rapportComplete({ done: true, hours: 2, text: 'Treppenhaus', photos: [] })).toBe(true);
+    expect(rapportComplete({ done: true, hours: 2, text: 'Treppenhaus' })).toBe(true);
+  });
+
   it('no location recorded is sent as null, never as a guess', () => {
     const item = shiftItem(shift(at(2026, 10, 12, 7), null), plainSettings(), at(2026, 10, 12, 8));
     expect(item).toMatchObject({ end: null, startLocation: null, endLocation: null });

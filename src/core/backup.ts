@@ -1,6 +1,7 @@
 import { normalizeShift } from './punch';
 import { sanitizeSettings } from './settings';
 import { dayKey, isValidDayKey } from './periods';
+import { cleanPhotos } from './photos';
 import type { Break, DayNote, GeoResult, Rapport, Settings, Shift, Stamp } from './types';
 
 export const BACKUP_APP_ID = 'punch-clock';
@@ -105,7 +106,8 @@ function parseRapport(v: unknown): Rapport | undefined {
   if (!isObj(v)) return undefined;
   if (v.done === false) return { done: false };
   if (v.done === true && isTime(v.hours) && typeof v.text === 'string') {
-    return { done: true, hours: v.hours, text: v.text };
+    const photos = cleanPhotos(v.photos);
+    return { done: true, hours: v.hours, text: v.text, ...(photos.length > 0 && { photos }) };
   }
   return undefined;
 }

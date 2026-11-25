@@ -104,7 +104,15 @@ export interface DateRange {
  * Extra work billed by the hour (Rapportarbeiten). Asked on every working day,
  * so "none" is an explicit answer, not a forgotten one.
  */
-export type Rapport = { done: false } | { done: true; hours: number; text: string };
+export type Rapport =
+  | { done: false }
+  | {
+      done: true;
+      hours: number;
+      text: string;
+      /** Optional photos of the work, shrunk JPEG data URLs (see core/photos.ts). */
+      photos?: string[];
+    };
 
 /** Note for a whole calendar day: where the work was done, plus the Rapport answer. */
 export interface DayNote {

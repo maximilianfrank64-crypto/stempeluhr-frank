@@ -262,6 +262,12 @@ export const en = {
   'rapport.hours': 'Rapport hours',
   'rapport.what': 'What was done (Rapport)',
   'rapport.whatPlaceholder': 'e.g. extra plastering in the stairwell, requested by the customer',
+  'rapport.photos': 'Photos (optional)',
+  'rapport.photosHelp': 'Up to {n} photos of the work. You do not have to add any.',
+  'rapport.photoAdd': '+ Photo',
+  'rapport.photoAlt': 'Photo {n}',
+  'rapport.photoRemove': 'Remove photo {n}',
+  'rapport.photoError': 'The photo could not be read. Please try another one.',
   'history.autoClosed': 'auto punched out 23:59',
 } as const;
 export type MessageKey = keyof typeof en;

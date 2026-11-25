@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { recentAddresses } from '../../core/addresses';
 import { formatDateLong } from '../../core/format';
+import { MAX_RAPPORT_PHOTOS, photoFromFile } from '../../core/photos';
 import { rapportComplete } from '../../core/sync';
 import type { Rapport } from '../../core/types';
 import { useApp } from '../../store/appStore';
@@ -162,6 +163,8 @@ export function PunchOutDialog({
   const [done, setDone] = useState<boolean | null>(null);
   const [hours, setHours] = useState('');
   const [what, setWhat] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [photoError, setPhotoError] = useState(false);
 
   const reset = () => {
     setText('');
@@ -169,6 +172,21 @@ export function PunchOutDialog({
     setDone(null);
     setHours('');
     setWhat('');
+    setPhotos([]);
+    setPhotoError(false);
+  };
+
+  const addPhotos = async (files: FileList | null) => {
+    if (!files) return;
+    setPhotoError(false);
+    for (const file of Array.from(files)) {
+      try {
+        const photo = await photoFromFile(file);
+        setPhotos((cur) => (cur.length < MAX_RAPPORT_PHOTOS ? [...cur, photo] : cur));
+      } catch {
+        setPhotoError(true);
+      }
+    }
   };
 
   // A new day always starts with an empty report: nothing is carried over from yesterday.
@@ -185,6 +203,7 @@ export function PunchOutDialog({
       if (r.done) {
         setHours(String(r.hours).replace('.', ','));
         setWhat(r.text);
+        setPhotos(r.photos ?? []);
       }
     }
     // Only on opening and when the stored note arrives, not while typing.
@@ -196,7 +215,7 @@ export function PunchOutDialog({
     done === false
       ? { done: false }
       : done
-        ? { done: true, hours: hoursNum, text: what }
+        ? { done: true, hours: hoursNum, text: what, ...(photos.length > 0 && { photos }) }
         : undefined;
   const valid =
     text.trim() !== '' &&
@@ -283,6 +302,44 @@ export function PunchOutDialog({
               placeholder={t('rapport.whatPlaceholder')}
               onChange={(e) => setWhat(e.target.value)}
             />
+            <div className="photos">
+              <span className="photos-label">{t('rapport.photos')}</span>
+              <div className="photo-list">
+                {photos.map((src, i) => (
+                  <div className="photo" key={i}>
+                    <img src={src} alt={t('rapport.photoAlt', { n: i + 1 })} />
+                    <button
+                      type="button"
+                      className="photo-remove"
+                      aria-label={t('rapport.photoRemove', { n: i + 1 })}
+                      onClick={() => setPhotos((cur) => cur.filter((_, j) => j !== i))}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {photos.length < MAX_RAPPORT_PHOTOS && (
+                  <label className="photo-add">
+                    {t('rapport.photoAdd')}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        void addPhotos(e.target.files);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+              <small className="muted">{t('rapport.photosHelp', { n: MAX_RAPPORT_PHOTOS })}</small>
+              {photoError && (
+                <small className="error" role="alert">
+                  {t('rapport.photoError')}
+                </small>
+              )}
+            </div>
           </>
         )}
       </fieldset>

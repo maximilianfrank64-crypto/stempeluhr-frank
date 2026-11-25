@@ -268,5 +268,11 @@ export const de: Messages = {
   'rapport.hours': 'Rapport-Stunden',
   'rapport.what': 'Was wurde gemacht (Rapport)?',
   'rapport.whatPlaceholder': 'z. B. Treppenhaus nachgeputzt, auf Wunsch vom Kunden',
+  'rapport.photos': 'Fotos (freiwillig)',
+  'rapport.photosHelp': 'Bis zu {n} Fotos von der Arbeit. Du musst keines hinzufügen.',
+  'rapport.photoAdd': '+ Foto',
+  'rapport.photoAlt': 'Foto {n}',
+  'rapport.photoRemove': 'Foto {n} entfernen',
+  'rapport.photoError': 'Das Foto konnte nicht gelesen werden. Bitte ein anderes versuchen.',
   'history.autoClosed': 'automatisch um 23:59 ausgestempelt',
 };
