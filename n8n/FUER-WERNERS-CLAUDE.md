@@ -132,3 +132,21 @@ weitergeben, nicht ins Internet hochladen und nur für Lohn und Abrechnung verwe
 - **Neuer Mitarbeiter will mitmachen:** Er installiert die App, trägt in den Einstellungen
   unter „Firma“ seinen Namen und den Firmenschlüssel ein. Den Schlüssel hat Werner. Er gehört
   nicht in Chats, auch nicht in diesen.
+
+## Rapport-Fotos (Beleg)
+
+Mitarbeiter können beim Ausstempeln bei Rapportarbeiten bis zu 3 Fotos mitschicken (freiwillig).
+n8n schickt jedes Foto als **eigene Mail** an Werner, täglich um 19:00 und 06:30 (nur neue Fotos):
+
+- Betreff: `Stempeluhr: Rapport-Foto <Datum> <Adresse> (<Mitarbeiter>)`
+- Anhang: ein JPG, Dateiname `<Datum>_<Mitarbeiter>_Rapport_<Arbeit>_<Nr>.jpg`
+- Text: Datum, Mitarbeiter, Adresse, Rapport Stunden, Rapport Arbeiten, Foto x von y
+
+**Nichts von Hand tun.** Auf PC-ALEX legt `automatik\rapport-fotos-ablegen.ps1` (Aufruf in
+`winworker-import-warteschlange.ps1`) das Foto in `07 Baustellen und Angebote\Rapport-Fotos\<Projektnummer> <Projektname>\`
+ab. Ist das Projekt nicht eindeutig, heißt der Ordner `Adresse - <Adresse>`; ohne Adresse `_Ohne Adresse`.
+In jedem Ordner steht `Rapport-Liste.csv` mit dem Text zu den Fotos. Die Mail wandert danach nach
+Posteingang\Stempeluhr. Fragt Werner nach allen Rapportarbeiten einer Baustelle, such die Ordner zur
+Adresse, lies `Rapport-Liste.csv` und liste Datum, Mitarbeiter, Stunden, Arbeiten und Fotos auf.
+
+n8n-Aufbau: `node n8n/aufbau-fotos.mjs` (legt "Stempeluhr - Rapport-Fotos" **ausgeschaltet** an, ein Mensch schaltet ein).
